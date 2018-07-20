@@ -9,28 +9,20 @@ defmodule Pieces.RandMsg do
     {:ok, []}
   end
 
-  def handle_call(:pop, _from, [h | t]) do
-    {:reply, h, t}
+  def cast(args) do
+    GenServer.cast(self(), args)
   end
 
-  def handle_cast({:parse, data}, state) do
+  def call(args) do
+    GenServer.call(self(), args)
+  end
+
+  def handle_call({args, %{"required" => required, "optional" => optional}}, _from, state) do
+    {:reply, {"msg", Enum.random(args)}, state}
+  end
+
+  def handle_cast({args, %{"required" => required, "optional" => optional}}, state) do
     {:noreply, state}
-  end
-
-  def parse_msg(["!" <> command|args], parsed_msg) do
-    {:ok, %{command: command, args: args}}
-  end
-
-  def parse_msg(msg, parsed_msg) do
-    {:pass, parsed_msg}
-  end
-
-  def dispatch(_not_command) do
-    :error
-  end
-
-  def dispatch() do
-    {:ok}
   end
 
   def terminate(_reason, _state) do
